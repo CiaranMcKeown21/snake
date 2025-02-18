@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Snake Game</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #222;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+      canvas {
+        border: 3px solid white;
+        background-color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🐍 Snake Game</h1>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <p>Use Arrow Keys to Play</p>
+    
+    <script>
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const gridSize = 20;
+      let snake = [{ x: 200, y: 200 }];
+      let direction = { x: 0, y: 0 };
+      let apple = { x: 100, y: 100 };
+      let score = 0;
+
+      function drawRect(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, gridSize, gridSize);
+      }
+
+      function randomPosition() {
+        return Math.floor(Math.random() * 20) * gridSize;
+      }
+
+      function update() {
+        const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+        snake.unshift(head);
+
+        if (head.x === apple.x && head.y === apple.y) {
+          score++;
+          apple = { x: randomPosition(), y: randomPosition() };
+        } else {
+          snake.pop();
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw snake
+        snake.forEach((segment, index) => drawRect(segment.x, segment.y, index === 0 ? 'lime' : 'green'));
+
+        // Draw apple
+        drawRect(apple.x, apple.y, 'red');
+      }
+
+      function checkCollision() {
+        const head = snake[0];
+        if (
+          head.x < 0 ||
+          head.x >= canvas.width ||
+          head.y < 0 ||
+          head.y >= canvas.height ||
+          snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)
+        ) {
+          alert(`Game Over! Score: ${score}`);
+          location.reload();
+        }
+      }
+
+      window.addEventListener('keydown', (e) => {
+        const key = e.key;
+        if (key === 'ArrowUp' && direction.y === 0) direction = { x: 0, y: -gridSize };
+        if (key === 'ArrowDown' && direction.y === 0) direction = { x: 0, y: gridSize };
+        if (key === 'ArrowLeft' && direction.x === 0) direction = { x: -gridSize, y: 0 };
+        if (key === 'ArrowRight' && direction.x === 0) direction = { x: gridSize, y: 0 };
+      });
+
+      function gameLoop() {
+        update();
+        draw();
+        checkCollision();
+      }
+
+      setInterval(gameLoop, 150);
+    </script>
+  </body>
+</html>
